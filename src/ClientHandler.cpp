@@ -2,6 +2,8 @@
 #include "Logger.h"
 #include "utils.h"
 #include "DelimitedProtocol.h"
+#include "JsonProtocol.h"
+#include "json.h"
 
 #include <unistd.h>
 #include <cstring>
@@ -9,7 +11,7 @@
 
 ClientHandler::ClientHandler(int clientFd, ClientCallback funcPtr) : clientFd_(clientFd), callback(funcPtr)
 {
-    this->protocolHandler = std::make_shared<DelimitedProtocol>();
+    this->protocolHandler = std::make_shared<JsonProtocol>();
     Logger::log("ClientHandler :: Handler created for fd: " + get_peer_address(clientFd_));
 }
 

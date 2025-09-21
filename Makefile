@@ -177,6 +177,30 @@ src/DelimitedProtocol.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/DelimitedProtocol.cpp.s
 .PHONY : src/DelimitedProtocol.cpp.s
 
+src/JsonProtocol.o: src/JsonProtocol.cpp.o
+.PHONY : src/JsonProtocol.o
+
+# target to build an object file
+src/JsonProtocol.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/JsonProtocol.cpp.o
+.PHONY : src/JsonProtocol.cpp.o
+
+src/JsonProtocol.i: src/JsonProtocol.cpp.i
+.PHONY : src/JsonProtocol.i
+
+# target to preprocess a source file
+src/JsonProtocol.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/JsonProtocol.cpp.i
+.PHONY : src/JsonProtocol.cpp.i
+
+src/JsonProtocol.s: src/JsonProtocol.cpp.s
+.PHONY : src/JsonProtocol.s
+
+# target to generate assembly for a file
+src/JsonProtocol.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/JsonProtocol.cpp.s
+.PHONY : src/JsonProtocol.cpp.s
+
 src/Server.o: src/Server.cpp.o
 .PHONY : src/Server.o
 
@@ -200,6 +224,30 @@ src/Server.s: src/Server.cpp.s
 src/Server.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/Server.cpp.s
 .PHONY : src/Server.cpp.s
+
+src/json.o: src/json.cpp.o
+.PHONY : src/json.o
+
+# target to build an object file
+src/json.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/json.cpp.o
+.PHONY : src/json.cpp.o
+
+src/json.i: src/json.cpp.i
+.PHONY : src/json.i
+
+# target to preprocess a source file
+src/json.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/json.cpp.i
+.PHONY : src/json.cpp.i
+
+src/json.s: src/json.cpp.s
+.PHONY : src/json.s
+
+# target to generate assembly for a file
+src/json.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/json.cpp.s
+.PHONY : src/json.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -240,9 +288,15 @@ help:
 	@echo "... src/DelimitedProtocol.o"
 	@echo "... src/DelimitedProtocol.i"
 	@echo "... src/DelimitedProtocol.s"
+	@echo "... src/JsonProtocol.o"
+	@echo "... src/JsonProtocol.i"
+	@echo "... src/JsonProtocol.s"
 	@echo "... src/Server.o"
 	@echo "... src/Server.i"
 	@echo "... src/Server.s"
+	@echo "... src/json.o"
+	@echo "... src/json.i"
+	@echo "... src/json.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

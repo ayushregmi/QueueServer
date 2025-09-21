@@ -180,6 +180,6 @@ void Server::handleClientMessage(MAYBE_UNUSED int clientFd, const std::vector<Pa
     std::mutex();
     for (const auto &msg : messages)
     {
-        Logger::log("Parsed Message: command=" + msg.command + ", length=" + std::to_string(msg.msgLen) + ", payload=" + msg.payload);
+        Logger::log("Message from client " + get_peer_address(clientFd) + " : " + std::string(msg.jsonMessage["command"]));
     }
 }

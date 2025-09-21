@@ -14,6 +14,8 @@ set(SOURCES
     src/ClientHandler.cpp
     src/Server.cpp
     src/DelimitedProtocol.cpp
+    src/json.cpp
+    src/JsonProtocol.cpp
 )
 
 # Add executable target named "queue-server"

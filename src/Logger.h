@@ -18,7 +18,7 @@ enum class LogLevel
 class Logger
 {
 public:
-    static void log(const std::string &msg, LogLevel level = LogLevel::INFO)
+    static void log(const std::string &module, const std::string &msg, LogLevel level = LogLevel::INFO)
     {
         std::lock_guard<std::mutex> lock(mtx);
 
@@ -58,6 +58,7 @@ public:
                   << "[" << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X")
                   << "." << std::setfill('0') << std::setw(3) << ms.count() << "] "
                   << "[" << levelStr << "] "
+                  << "[" << module << "] "
                   << msg
                   << "\033[0m" << std::endl;
     }

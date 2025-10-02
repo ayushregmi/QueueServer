@@ -15,6 +15,7 @@ public:
     virtual ~Protocol() = default;
     virtual void clear() = 0;
     virtual std::vector<ParsedMessage> parseData(const std::string &buffer) = 0;
+    virtual std::string prepareData(const std::string &buffer) = 0;
 };
 
 #endif

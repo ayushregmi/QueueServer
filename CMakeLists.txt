@@ -9,14 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Define source files for the project
-set(SOURCES
-    src/main.cpp
-    src/ClientHandler.cpp
-    src/Server.cpp
-    src/DelimitedProtocol.cpp
-    src/json.cpp
-    src/JsonProtocol.cpp
-)
+# set(SOURCES
+#     src/*
+# )
+file(GLOB SOURCES "src/*.cpp")
 
 # Add executable target named "queue-server"
 add_executable(queue-server ${SOURCES})

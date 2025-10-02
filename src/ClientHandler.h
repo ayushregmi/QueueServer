@@ -1,24 +1,38 @@
 #ifndef CLIENTHANDLER_H
 #define CLIENTHANDLER_H
 
-#include "Protocol.h"
+#include "DelimitedProtocol.h"
+#include "Logger.h"
+#include "json.h"
+#include "JsonProtocol.h"
 #include "ParsedMessage.h"
+#include "Protocol.h"
+#include "utils.h"
 
-#include <string>
-#include <memory>
+#include <cstring>
 #include <functional>
+#include <memory>
+#include <string>
+#include <sys/socket.h>
+#include <unistd.h>
 #include <vector>
+#include <errno.h>
+#include <thread>
+#include <chrono>
 
-using ClientCallback = std::function<void(int, std::vector<ParsedMessage>)>;
+class ClientHandler;
 
 class ClientHandler
 {
+private:
+    using ClientCallback = std::function<void(ClientHandler *, std::vector<ParsedMessage>)>;
 
 public:
     explicit ClientHandler(int clientFd, ClientCallback callback);
     ~ClientHandler();
     int getFd() const;
     bool handleRead();
+    void handleSend(const std::string &message);
 
 private:
     std::shared_ptr<Protocol> protocolHandler;

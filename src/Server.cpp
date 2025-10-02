@@ -1,22 +1,13 @@
 #include "Server.h"
-#include "ClientHandler.h"
-#include "Logger.h"
-#include "utils.h"
-#include <sys/socket.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/epoll.h>
-#include <signal.h>
-#include <cstring>
 
 constexpr int MAX_CLIENTS = 64;
 Server *Server::instance = nullptr;
+std::mutex Server::sendMutex;
 
 void Server::signalHandler(int signum)
 {
     std::string signalName = strsignal(signum);
-    Logger::log("Server :: Caught signal " + std::to_string(signum) + " (" + signalName + "), shutting down...", LogLevel::SUCCESS);
+    Logger::log("Server", "Caught signal " + std::to_string(signum) + " (" + signalName + "), shutting down...", LogLevel::SUCCESS);
 
     if (Server::instance)
     {
@@ -24,7 +15,9 @@ void Server::signalHandler(int signum)
     }
 }
 
-Server::Server(int port) : serverSocket_(-1), port_(port), epollfd_(-1), running_(true) {}
+Server::Server(int port) : serverSocket_(-1), port_(port), epollfd_(-1), running_(true), queueManager(std::make_unique<QueueManager>())
+{
+}
 
 Server::~Server()
 {
@@ -34,15 +27,24 @@ Server::~Server()
     {
         delete handler;
     }
-    Logger::log("Server :: Shutting down server...", LogLevel::SUCCESS);
+    Logger::log("Server", "Shutting down server...", LogLevel::SUCCESS);
 }
 
 void Server::run()
 {
-    Server::instance = this;
-    this->setupServerSocket();
-    this->setupEpoll();
-    this->eventLoop();
+    try
+    {
+        Server::instance = this;
+        this->setupServerSocket();
+        this->setupEpoll();
+        this->eventLoop();
+    }
+    catch (const std::exception &e)
+    {
+        Logger::log("Server", e.what(), LogLevel::ERROR);
+        if (Server::instance)
+            Server::instance->running_ = false;
+    }
 }
 
 void Server::setupServerSocket()
@@ -70,7 +72,7 @@ void Server::setupServerSocket()
         exit(1);
     }
     fcntl(serverSocket_, F_SETFL, O_NONBLOCK);
-    Logger::log("Server :: socket initialized on port " + std::to_string(port_), LogLevel::SUCCESS);
+    Logger::log("Server", "socket initialized on port " + std::to_string(port_), LogLevel::SUCCESS);
 }
 
 void Server::setupEpoll()
@@ -89,15 +91,15 @@ void Server::setupEpoll()
         perror("epoll_ctl: serverSocket");
         exit(0);
     }
-    Logger::log("Server :: Epoll setup completed", LogLevel::SUCCESS);
+    Logger::log("Server", "Epoll setup completed", LogLevel::SUCCESS);
 }
 
 void Server::eventLoop()
 {
     epoll_event events[MAX_CLIENTS];
-    Logger::log("Server :: Starting event loop", LogLevel::SUCCESS);
+    Logger::log("Server", "Starting event loop", LogLevel::SUCCESS);
     signal(SIGINT, Server::signalHandler);
-    Logger::log("Server :: Press Ctrl+C to stop the server");
+    Logger::log("Server", "Press Ctrl+C to stop the server");
     while (running_)
     {
         int n = epoll_wait(epollfd_, events, MAX_CLIENTS, -1);
@@ -156,7 +158,7 @@ void Server::handleClient(int clientFd, uint32_t events)
         return;
     if (events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
     {
-        Logger::log("Server :: Client fd " + get_peer_address(clientFd) + " disconnected or errored.");
+        Logger::log("Server", "Client fd " + get_peer_address(clientFd) + " disconnected or errored.");
         removeClient(clientFd);
         return;
     }
@@ -169,17 +171,36 @@ void Server::handleClient(int clientFd, uint32_t events)
 
 void Server::removeClient(int clientFd)
 {
-    Logger::log("Server :: Disconnecting client " + get_peer_address(clientFd));
+    Logger::log("Server", "Disconnecting client " + get_peer_address(clientFd));
     epoll_ctl(epollfd_, EPOLL_CTL_DEL, clientFd, nullptr);
     delete clients[clientFd];
     clients.erase(clientFd);
 }
 
-void Server::handleClientMessage(MAYBE_UNUSED int clientFd, const std::vector<ParsedMessage> &messages)
+void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector<ParsedMessage> &messages)
 {
-    std::mutex();
     for (const auto &msg : messages)
     {
-        Logger::log("Message from client " + get_peer_address(clientFd) + " : " + std::string(msg.jsonMessage["command"]));
+        JSON rtnMessage;
+        try
+        {
+            if (!msg.isValid)
+            {
+                rtnMessage["Error"] = msg.error;
+            }
+            else
+            {
+                JSON messageContent = msg.jsonMessage;
+                rtnMessage = instance->queueManager->handleMessage(messageContent);
+            }
+        }
+        catch (std::runtime_error &err)
+        {
+            // Logger::log("Server", "Invalid Message from " + get_peer_address(clientFd) + ". What: " + err.what() + ". Received Message: " + msg.jsonMessage.dump());
+            std::string errorMessage = err.what();
+            rtnMessage["error"] = errorMessage;
+        }
+        std::string message = rtnMessage.dump();
+        clientHandler->handleSend(message);
     }
 }

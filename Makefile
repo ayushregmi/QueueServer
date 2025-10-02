@@ -201,6 +201,54 @@ src/JsonProtocol.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/JsonProtocol.cpp.s
 .PHONY : src/JsonProtocol.cpp.s
 
+src/Queue.o: src/Queue.cpp.o
+.PHONY : src/Queue.o
+
+# target to build an object file
+src/Queue.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/Queue.cpp.o
+.PHONY : src/Queue.cpp.o
+
+src/Queue.i: src/Queue.cpp.i
+.PHONY : src/Queue.i
+
+# target to preprocess a source file
+src/Queue.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/Queue.cpp.i
+.PHONY : src/Queue.cpp.i
+
+src/Queue.s: src/Queue.cpp.s
+.PHONY : src/Queue.s
+
+# target to generate assembly for a file
+src/Queue.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/Queue.cpp.s
+.PHONY : src/Queue.cpp.s
+
+src/QueueManager.o: src/QueueManager.cpp.o
+.PHONY : src/QueueManager.o
+
+# target to build an object file
+src/QueueManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/QueueManager.cpp.o
+.PHONY : src/QueueManager.cpp.o
+
+src/QueueManager.i: src/QueueManager.cpp.i
+.PHONY : src/QueueManager.i
+
+# target to preprocess a source file
+src/QueueManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/QueueManager.cpp.i
+.PHONY : src/QueueManager.cpp.i
+
+src/QueueManager.s: src/QueueManager.cpp.s
+.PHONY : src/QueueManager.s
+
+# target to generate assembly for a file
+src/QueueManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/queue-server.dir/build.make CMakeFiles/queue-server.dir/src/QueueManager.cpp.s
+.PHONY : src/QueueManager.cpp.s
+
 src/Server.o: src/Server.cpp.o
 .PHONY : src/Server.o
 
@@ -291,6 +339,12 @@ help:
 	@echo "... src/JsonProtocol.o"
 	@echo "... src/JsonProtocol.i"
 	@echo "... src/JsonProtocol.s"
+	@echo "... src/Queue.o"
+	@echo "... src/Queue.i"
+	@echo "... src/Queue.s"
+	@echo "... src/QueueManager.o"
+	@echo "... src/QueueManager.i"
+	@echo "... src/QueueManager.s"
 	@echo "... src/Server.o"
 	@echo "... src/Server.i"
 	@echo "... src/Server.s"

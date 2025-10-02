@@ -34,7 +34,7 @@ double JSON::as_double() const
 
 bool JSON::as_bool() const
 {
-    if (type == Type::Double)
+    if (type == Type::Boolean)
     {
         return bool_value;
     }
@@ -44,7 +44,7 @@ bool JSON::as_bool() const
     }
 }
 
-const std::vector<JSON> &JSON::as_array() const
+std::vector<JSON> &JSON::as_array()
 {
     if (type == Type::Array)
     {
@@ -84,6 +84,11 @@ JSON &JSON::operator[](const std::string &key)
 
 JSON::operator std::string() const
 {
+    if (type == Type::String)
+    {
+        return this->str_value;
+    }
+
     return this->dump();
 }
 
@@ -96,7 +101,7 @@ const JSON &JSON::operator[](const std::string &key) const
     auto it = object_value.find(key);
     if (it == object_value.end())
     {
-        throw std::out_of_range("Key not found in JSON object");
+        throw std::out_of_range("Key: '" + key + "' not found in JSON object");
     }
     return it->second;
 }
@@ -142,6 +147,11 @@ JSON JSON::loads(const std::string &json_str)
 {
     std::istringstream stream(json_str);
     return parse_value(stream);
+}
+
+bool JSON::is_null() const
+{
+    return type == Type::Null;
 }
 
 JSON JSON::parse_value(std::istringstream &stream)
@@ -260,6 +270,11 @@ std::string JSON::parse_string(std::istringstream &stream)
         r += c;
     }
     return r;
+}
+
+bool JSON::contains(const std::string &key) const
+{
+    return type == Type::Object && object_value.find(key) != object_value.end();
 }
 
 std::ostream &operator<<(std::ostream &os, const JSON &json)

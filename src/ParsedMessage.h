@@ -11,6 +11,8 @@ struct ParsedMessage
     int msgLen;
     std::string payload;
     JSON jsonMessage;
+    bool isValid;
+    std::string error;
 };
 
 #endif

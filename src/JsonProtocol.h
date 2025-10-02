@@ -10,7 +10,8 @@ class JsonProtocol : public Protocol
 public:
     JsonProtocol();
     ~JsonProtocol();
-    std::vector<ParsedMessage> parseData(const std::string &buffer);
+    std::vector<ParsedMessage> parseData(const std::string &buffer) override;
+    std::string prepareData(const std::string &buffer) override;
     void clear();
 };
 

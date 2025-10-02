@@ -7,6 +7,10 @@
 #include <string>
 #include <cctype>
 #include <signal.h>
+#include <random>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
 
 #include "Logger.h"
 
@@ -17,14 +21,14 @@ MAYBE_UNUSED inline std::string get_peer_address(int client_fd)
 
     if (getpeername(client_fd, (struct sockaddr *)&client_addr, &addr_len) == -1)
     {
-        Logger::log("Failed to get client address with getpeername()");
+        Logger::log("get_peer_address()", "Failed to get client address with getpeername()");
         return "";
     }
 
     char ip_str[INET_ADDRSTRLEN];
     if (inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, sizeof(ip_str)) == nullptr)
     {
-        Logger::log("Failed to convert client IP address");
+        Logger::log("get_peer_address()", "Failed to convert client IP address");
         return "";
     }
 
@@ -44,6 +48,24 @@ MAYBE_UNUSED inline std::string trim(const std::string &str)
         --last;
 
     return str.substr(first, last - first);
+}
+
+MAYBE_UNUSED inline unsigned long long generateMessageId()
+{
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
+    static std::uniform_int_distribution<unsigned long long> dis;
+    return dis(gen);
+}
+
+MAYBE_UNUSED inline std::string epochToUTCString(unsigned long long epochSeconds)
+{
+    std::time_t t = static_cast<std::time_t>(epochSeconds);
+    std::tm *utc_tm = std::gmtime(&t);
+
+    std::stringstream ss;
+    ss << std::put_time(utc_tm, "%Y-%m-%d %H:%M:%S");
+    return ss.str();
 }
 
 #endif

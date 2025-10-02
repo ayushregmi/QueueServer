@@ -49,7 +49,7 @@ public:
     int as_int() const;
     double as_double() const;
     const std::string &as_string() const;
-    const std::vector<JSON> &as_array() const;
+    std::vector<JSON> &as_array();
     const std::unordered_map<std::string, JSON> &as_object() const;
 
     JSON &operator[](const std::string &key);
@@ -59,6 +59,9 @@ public:
 
     std::string dump() const;
     static JSON loads(const std::string &json_str);
+
+    bool is_null() const;
+    bool contains(const std::string &key) const;
 
 private:
     static JSON parse_value(std::istringstream &stream);

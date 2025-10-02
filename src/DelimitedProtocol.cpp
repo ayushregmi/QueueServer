@@ -1,6 +1,4 @@
 #include "DelimitedProtocol.h"
-#include "Logger.h"
-#include "utils.h"
 
 std::vector<ParsedMessage> DelimitedProtocol::parseData(const std::string &readBuffer_)
 {
@@ -12,41 +10,45 @@ std::vector<ParsedMessage> DelimitedProtocol::parseData(const std::string &readB
 
         if (firstDelim == std::string::npos)
             break;
-        std::string cmd = trim(prevBuffer.substr(0, firstDelim));
+        std::string msgLenStr = trim(prevBuffer.substr(0, firstDelim));
 
-        size_t secondDelim = prevBuffer.find("|", firstDelim + 1);
-        if (secondDelim == std::string::npos)
-            break;
-
-        std::string msgLenStr = trim(prevBuffer.substr(firstDelim + 1, secondDelim - firstDelim - 1));
         int msgLen = 0;
+        ParsedMessage message;
+
         try
         {
-            msgLen = std::stoi(msgLenStr);
+
+            try
+            {
+                msgLen = std::stoi(msgLenStr);
+            }
+            catch (...)
+            {
+                throw std::runtime_error("Protocol Error: invalid length field '" + msgLenStr + "'");
+            }
+
+            if (msgLen <= 0)
+            {
+
+                throw std::runtime_error("Protocol Error: Message length cannot be negative");
+            }
+
+            if (msgLen > MAX_MSG_LEN)
+            {
+                throw std::runtime_error("Protocol Error: Message too long");
+            }
+            size_t totalMessageLen = firstDelim + 1 + msgLen;
+            if (prevBuffer.size() < totalMessageLen)
+                break;
+            std::string payload = prevBuffer.substr(firstDelim + 1, msgLen);
+            prevBuffer = prevBuffer.substr(totalMessageLen);
+            message.jsonMessage = JSON::loads(payload);
         }
-        catch (...)
+        catch (const std::runtime_error &e)
         {
-            throw std::runtime_error("Protocol Error: invalid length field '" + msgLenStr + "'");
+            message.jsonMessage["error"] = std::string(e.what());
+            prevBuffer = prevBuffer.substr(firstDelim + 1);
         }
-
-        if (msgLen < 0)
-        {
-            throw std::runtime_error("Protocol Error: Message length cannot be negative");
-        }
-
-        size_t totalMessageLen = secondDelim + 1 + msgLen;
-
-        if (prevBuffer.size() < totalMessageLen)
-            break;
-
-        std::string payload = trim(prevBuffer.substr(secondDelim + 1, msgLen));
-
-        prevBuffer = prevBuffer.substr(totalMessageLen);
-
-        ParsedMessage message;
-        message.command = cmd;
-        message.msgLen = msgLen;
-        message.payload = payload;
 
         parsedMessages.push_back(std::move(message));
     }

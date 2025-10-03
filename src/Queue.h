@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <chrono>
+#include <algorithm>
 
 #include "json.h"
 #include "utils.h"
@@ -29,7 +30,7 @@ public:
 
     bool addMessageToQueue(std::string);
     const std::string getMessagesFromQueue(size_t);
-    // bool deleteMessageFromQueue(const std::string &);
+    bool deleteMessageFromQueue(const std::string &);
 };
 
 #endif

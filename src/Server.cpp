@@ -100,9 +100,12 @@ void Server::eventLoop()
     Logger::log("Server", "Starting event loop", LogLevel::SUCCESS);
     signal(SIGINT, Server::signalHandler);
     Logger::log("Server", "Press Ctrl+C to stop the server");
+
+    auto lastIdleCheck = std::chrono::steady_clock::now();
+
     while (running_)
     {
-        int n = epoll_wait(epollfd_, events, MAX_CLIENTS, -1);
+        int n = epoll_wait(epollfd_, events, MAX_CLIENTS, 1000);
         if (n < 0)
         {
             if (errno == EINTR)
@@ -124,6 +127,32 @@ void Server::eventLoop()
             {
                 handleClient(fd, ev);
             }
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        if (now - lastIdleCheck >= std::chrono::seconds(std::chrono::seconds(SERVER_TIMEOUT_SECONDS)))
+        {
+            std::vector<int> toDisconnect;
+
+            for (const auto &p : clientLastActive)
+            {
+                auto idleDuration = now - p.second;
+
+                if (idleDuration > std::chrono::seconds(IDLE_TIMEOUT_SECONDS))
+                {
+                    toDisconnect.push_back(p.first);
+                }
+            }
+
+            for (int fd : toDisconnect)
+            {
+                if (clients.find(fd) != clients.end())
+                {
+                    clients[fd]->sendTimeoutMessage();
+                    removeClient(fd);
+                }
+            }
+            lastIdleCheck = now;
         }
     }
 }
@@ -149,6 +178,7 @@ void Server::accecptConnection()
         return;
     }
     clients[clientFd] = new ClientHandler(clientFd, Server::handleClientMessage);
+    clientLastActive[clientFd] = std::chrono::steady_clock::now();
 }
 
 void Server::handleClient(int clientFd, uint32_t events)
@@ -156,16 +186,26 @@ void Server::handleClient(int clientFd, uint32_t events)
     auto it = clients.find(clientFd);
     if (it == clients.end())
         return;
+
+    if (events & EPOLLIN)
+    {
+        clientLastActive[clientFd] = std::chrono::steady_clock::now();
+    }
+
     if (events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
     {
         Logger::log("Server", "Client fd " + get_peer_address(clientFd) + " disconnected or errored.");
         removeClient(clientFd);
+        clientLastActive.erase(clientFd);
         return;
     }
     if (events & EPOLLIN)
     {
         if (!it->second->handleRead())
+        {
             removeClient(clientFd);
+            clientLastActive.erase(clientFd);
+        }
     }
 }
 
@@ -175,6 +215,7 @@ void Server::removeClient(int clientFd)
     epoll_ctl(epollfd_, EPOLL_CTL_DEL, clientFd, nullptr);
     delete clients[clientFd];
     clients.erase(clientFd);
+    clientLastActive.erase(clientFd);
 }
 
 void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector<ParsedMessage> &messages)

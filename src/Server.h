@@ -1,6 +1,10 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#define SERVER_TIMEOUT_SECONDS 10
+#define IDLE_TIMEOUT_SECONDS 5
+
+#include <algorithm>
 #include <cerrno>
 #include <chrono>
 #include <cstdint>
@@ -39,9 +43,10 @@ private:
     int epollfd_;
     bool running_;
 
+    std::unordered_map<int, std::chrono::steady_clock::time_point> clientLastActive;
     std::unique_ptr<QueueManager> queueManager;
-
     std::unordered_map<int, ClientHandler *> clients;
+
     static void signalHandler(int signum);
     void setupServerSocket();
     void setupEpoll();

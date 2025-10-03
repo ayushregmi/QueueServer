@@ -28,7 +28,7 @@ bool Queue::addMessageToQueue(std::string data)
 
 const std::string Queue::getMessagesFromQueue(size_t numberOfMessages)
 {
-    JSON jsonMessage = new std::vector<JSON>();
+    JSON jsonMessage(std::vector<JSON>{});
 
     if (messagesOrder.size() < numberOfMessages)
     {
@@ -48,7 +48,19 @@ const std::string Queue::getMessagesFromQueue(size_t numberOfMessages)
     return jsonMessage.dump();
 }
 
-// bool Queue::deleteMessageFromQueue(const std::string &)
-// {
+bool Queue::deleteMessageFromQueue(const std::string &messageId)
+{
 
-// }
+    if (this->messagesMap.find(messageId) == this->messagesMap.end())
+    {
+
+        return false;
+    }
+
+    this->messagesMap.erase(messageId);
+    messagesOrder.erase(
+        std::remove(messagesOrder.begin(), messagesOrder.end(), messageId),
+        messagesOrder.end());
+
+    return true;
+}

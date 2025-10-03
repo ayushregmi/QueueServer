@@ -23,7 +23,7 @@ private:
     void createNewQueue(const JSON &, JSON &);
     void getMessagesFromQueue(const JSON &, JSON &);
     void addMessageToQueue(const JSON &, JSON &);
-    void deleteQueue(const JSON &, JSON &);
+    void deleteMessageFromQueue(const JSON &, JSON &);
 
     static std::string getQueueName(const JSON &message);
 

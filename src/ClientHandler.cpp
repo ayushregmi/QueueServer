@@ -101,3 +101,10 @@ void ClientHandler::handleSend(const std::string &message)
         totalBytesSent += static_cast<size_t>(n);
     }
 }
+
+void ClientHandler::sendTimeoutMessage()
+{
+    JSON msg;
+    msg["Error"] = "Server Timeout. Connection closed due to inactivity";
+    handleSend(msg.dump());
+}

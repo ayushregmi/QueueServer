@@ -12,11 +12,11 @@ QueueManager::QueueManager()
     };
     this->operationMap["get_message"] = [this](const JSON &res, JSON &req)
     {
-        addMessageToQueue(res, req);
+        getMessagesFromQueue(res, req);
     };
-    this->operationMap["delete_queue"] = [this](const JSON &res, JSON &req)
+    this->operationMap["delete_message"] = [this](const JSON &res, JSON &req)
     {
-        addMessageToQueue(res, req);
+        deleteMessageFromQueue(res, req);
     };
 }
 
@@ -76,20 +76,89 @@ void QueueManager::createNewQueue(const JSON &req, JSON &res)
 
 void QueueManager::getMessagesFromQueue(const JSON &req, JSON &res)
 {
-    Logger::log("QueueManager", req.dump());
-    res["Success"] = "Message aayo hai";
+    std::string queueName = getQueueName(req);
+    if (queueName == "")
+    {
+        res["Error"] = "Queue name missing";
+        return;
+    }
+
+    auto q = queueMap.find(queueName);
+
+    if (q == queueMap.end())
+    {
+        res["Error"] = "Queue with name '" + queueName + "' does not exist";
+        return;
+    }
+
+    std::string messages = q->second.getMessagesFromQueue(10);
+
+    res["Messages"] = messages;
 }
 
 void QueueManager::addMessageToQueue(const JSON &req, JSON &res)
 {
-    Logger::log("QueueManager", req.dump());
-    res["Success"] = "Message add vayo hai";
+
+    std::string queueName = getQueueName(req);
+    if (queueName == "")
+    {
+        res["Error"] = "Queue name missing";
+        return;
+    }
+
+    auto q = queueMap.find(queueName);
+
+    if (q == queueMap.end())
+    {
+        res["Error"] = "Queue with name '" + queueName + "' does not exist";
+        return;
+    }
+
+    if (!req.contains("data"))
+    {
+        res["Error"] = "Data is missing";
+        return;
+    }
+
+    std::string data = req["data"];
+
+    q->second.addMessageToQueue(data);
+
+    res["Success"] = "Message added to queue";
 }
 
-void QueueManager::deleteQueue(const JSON &req, JSON &res)
+void QueueManager::deleteMessageFromQueue(const JSON &req, JSON &res)
 {
-    Logger::log("QueueManager", req.dump());
-    res["Success"] = "Queue Delete vayo hai";
+    std::string queueName = getQueueName(req);
+    if (queueName == "")
+    {
+        res["Error"] = "Queue name missing";
+        return;
+    }
+
+    if (!req.contains("messageId"))
+    {
+        res["Error"] = "Missing error Id";
+        return;
+    }
+
+    auto q = queueMap.find(queueName);
+
+    if (q == queueMap.end())
+    {
+        res["Error"] = "Queue with name '" + queueName + "' does not exist";
+        return;
+    }
+
+    std::string messageId = req["messageId"];
+
+    if (!q->second.deleteMessageFromQueue(messageId))
+    {
+        res["Error"] = "Queue is empty or Invalid message id ";
+        return;
+    }
+
+    res["Success"] = "Deleted message from queue";
 }
 
 std::string QueueManager::getQueueName(const JSON &message)

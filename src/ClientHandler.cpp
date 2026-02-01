@@ -1,8 +1,12 @@
 #include "ClientHandler.h"
 
-ClientHandler::ClientHandler(int clientFd, ClientCallback funcPtr) : clientFd_(clientFd), callback(funcPtr)
+#include <utility>
+
+#include "HTTPProtocol.h"
+
+ClientHandler::ClientHandler(int clientFd, ClientCallback callback) : clientFd_(clientFd), callback(std::move(callback))
 {
-    this->protocolHandler = std::make_shared<JsonProtocol>();
+    this->protocolHandler = std::make_shared<HTTPProtocol>();
     Logger::log("ClientHandler", "Handler created for fd: " + get_peer_address(clientFd_));
 }
 
@@ -26,7 +30,7 @@ bool ClientHandler::handleRead()
 
         if (n > 0)
         {
-            std::vector<ParsedMessage> messages;
+            std::vector<Request> messages;
             std::string readData(buffer, n);
             try
             {
@@ -62,9 +66,8 @@ bool ClientHandler::handleRead()
     return true;
 }
 
-void ClientHandler::handleSend(const std::string &message)
-{
-    std::string formattedMessage = protocolHandler->prepareData(message);
+void ClientHandler::handleSend(const Response &resp) const {
+    std::string formattedMessage = protocolHandler->prepareResponse(resp);
     size_t totalBytesSent = 0;
     size_t messageLen = formattedMessage.length();
     const char *data = formattedMessage.c_str();
@@ -104,7 +107,8 @@ void ClientHandler::handleSend(const std::string &message)
 
 void ClientHandler::sendTimeoutMessage()
 {
-    JSON msg;
-    msg["Error"] = "Server Timeout. Connection closed due to inactivity";
-    handleSend(msg.dump());
+    Response resp;
+    resp.statusCode = 504;
+    resp.body["Error"] = "Server Timeout. Connection closed due to inactivity";
+    handleSend(resp);
 }

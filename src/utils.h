@@ -6,11 +6,11 @@
 #include <arpa/inet.h>
 #include <string>
 #include <cctype>
-#include <signal.h>
 #include <random>
 #include <sstream>
 #include <iomanip>
 #include <ctime>
+#include <algorithm>
 
 #include "Logger.h"
 
@@ -66,6 +66,20 @@ MAYBE_UNUSED inline std::string epochToUTCString(unsigned long long epochSeconds
     std::stringstream ss;
     ss << std::put_time(utc_tm, "%Y-%m-%d %H:%M:%S");
     return ss.str();
+}
+
+MAYBE_UNUSED inline std::string trim_2(const std::string &s)
+{
+    size_t start = s.find_first_not_of(" \r\n\t");
+    size_t end = s.find_last_not_of(" \r\n\t");
+    return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
+}
+
+MAYBE_UNUSED inline static std::string toLower(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return s;
 }
 
 #endif

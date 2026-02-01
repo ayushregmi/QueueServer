@@ -5,7 +5,7 @@
 #include "Logger.h"
 #include "json.h"
 #include "JsonProtocol.h"
-#include "ParsedMessage.h"
+#include "Request.h"
 #include "Protocol.h"
 #include "utils.h"
 
@@ -25,14 +25,14 @@ class ClientHandler;
 class ClientHandler
 {
 private:
-    using ClientCallback = std::function<void(ClientHandler *, std::vector<ParsedMessage>)>;
+    using ClientCallback = std::function<void(ClientHandler *, std::vector<Request>)>;
 
 public:
     explicit ClientHandler(int clientFd, ClientCallback callback);
     ~ClientHandler();
     int getFd() const;
     bool handleRead();
-    void handleSend(const std::string &message);
+    void handleSend(const Response &message) const;
     void sendTimeoutMessage();
 
 private:

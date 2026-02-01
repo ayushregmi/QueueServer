@@ -1,9 +1,9 @@
 #include "DelimitedProtocol.h"
 
-std::vector<ParsedMessage> DelimitedProtocol::parseData(const std::string &readBuffer_)
+std::vector<Request> DelimitedProtocol::parseData(const std::string &readBuffer_)
 {
     prevBuffer += readBuffer_;
-    std::vector<ParsedMessage> parsedMessages;
+    std::vector<Request> parsedMessages;
     while (!prevBuffer.empty())
     {
         size_t firstDelim = prevBuffer.find("|");
@@ -13,7 +13,7 @@ std::vector<ParsedMessage> DelimitedProtocol::parseData(const std::string &readB
         std::string msgLenStr = trim(prevBuffer.substr(0, firstDelim));
 
         int msgLen = 0;
-        ParsedMessage message;
+        Request message;
 
         try
         {

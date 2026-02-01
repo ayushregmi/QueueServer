@@ -4,10 +4,10 @@ JsonProtocol::JsonProtocol() {}
 
 JsonProtocol::~JsonProtocol() {}
 
-std::vector<ParsedMessage> JsonProtocol::parseData(const std::string &buffer)
+std::vector<Request> JsonProtocol::parseData(const std::string &buffer)
 {
     prevBuffer += buffer;
-    std::vector<ParsedMessage> messages;
+    std::vector<Request> messages;
     while (!prevBuffer.empty())
     {
         size_t msgStart = prevBuffer.find("<start>");
@@ -19,7 +19,7 @@ std::vector<ParsedMessage> JsonProtocol::parseData(const std::string &buffer)
         std::string message = prevBuffer.substr(msgStart + 7, msgEnd - msgStart - 7);
         prevBuffer = prevBuffer.substr(msgEnd + 5);
 
-        ParsedMessage parsedMessage;
+        Request parsedMessage;
         try
         {
             parsedMessage.jsonMessage = JSON::loads(message);

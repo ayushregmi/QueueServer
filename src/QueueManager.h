@@ -15,15 +15,15 @@ class QueueManager
 {
 private:
     std::unordered_map<std::string, Queue> queueMap;
-    std::unordered_map<std::string, std::function<void(const JSON &, JSON &)>> operationMap;
+    std::unordered_map<std::string, std::function<int(const JSON &, JSON &)>> operationMap;
 
     const size_t maxNumberOfQueues = 5;
     size_t numOfQueues = 0;
 
-    void createNewQueue(const JSON &, JSON &);
-    void getMessagesFromQueue(const JSON &, JSON &);
-    void addMessageToQueue(const JSON &, JSON &);
-    void deleteMessageFromQueue(const JSON &, JSON &);
+    int createNewQueue(const JSON &, JSON &);
+    int getMessagesFromQueue(const JSON &, JSON &);
+    int addMessageToQueue(const JSON &, JSON &);
+    int deleteMessageFromQueue(const JSON &, JSON &);
 
     static std::string getQueueName(const JSON &message);
 
@@ -31,7 +31,13 @@ public:
     QueueManager();
     ~QueueManager() {};
 
-    JSON handleMessage(const JSON &);
+
+    int createNewQueue(const std::string &, JSON &);
+    int getMessagesFromQueue(const std::string&,JSON &);
+    int addMessageToQueue(const std::string&,const JSON &, JSON &);
+    int deleteMessageFromQueue(const std::string&, const JSON &, JSON &);
+
+    int handleRequest(const JSON &, JSON &);
 };
 
 #endif

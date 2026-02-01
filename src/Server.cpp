@@ -4,6 +4,12 @@ constexpr int MAX_CLIENTS = 64;
 Server *Server::instance = nullptr;
 std::mutex Server::sendMutex;
 
+
+std::string extractQueueName(const std::string &uri) {
+    // assumes /queue/{name}
+    size_t lastSlash = uri.find_last_of('/');
+    return (lastSlash == std::string::npos) ? "" : uri.substr(lastSlash + 1);
+}
 void Server::signalHandler(int signum)
 {
     std::string signalName = strsignal(signum);
@@ -15,7 +21,7 @@ void Server::signalHandler(int signum)
     }
 }
 
-Server::Server(int port) : serverSocket_(-1), port_(port), epollfd_(-1), running_(true), queueManager(std::make_unique<QueueManager>())
+Server::Server(int port) : serverSocket_(-1), port_(port), epollfd_(-1), running_(true), queueManager(std::make_unique<QueueManager>()), router(std::make_unique<Router>())
 {
 }
 
@@ -35,6 +41,7 @@ void Server::run()
     try
     {
         Server::instance = this;
+        this->setupRoutes();
         this->setupServerSocket();
         this->setupEpoll();
         this->eventLoop();
@@ -45,6 +52,55 @@ void Server::run()
         if (Server::instance)
             Server::instance->running_ = false;
     }
+}
+
+void Server::setupRoutes() const {
+
+    this->router->addRoute(
+        "GET",
+        std::regex(R"(^/queue/([^/]+)$)"),
+        [this](const Request& request, Response & response) {
+            std::string getQueueName = extractQueueName(request.uri);
+            if (getQueueName.empty()) {
+                response.body["error"] = "Queue name cannot be empty";
+                response.statusCode = 404;
+            }else {
+                response.statusCode = this->queueManager->getMessagesFromQueue(getQueueName, response.body);
+            }
+        }
+    );
+
+    this->router->addRoute(
+        "POST",
+        std::regex(R"(^/queue/([^/]+)$)"),
+        [this] (const Request& request, Response & response) {
+            std::string queueName = extractQueueName(request.uri);
+            if  (queueName.empty()) {
+                response.body["error"] = "Queue name cannot be empty";
+                response.statusCode = 404;
+            }else {
+                if (request.jsonMessage.is_null()) {
+                    response.statusCode = this->queueManager->createNewQueue(queueName, response.body);
+                }else {
+                    response.statusCode = this->queueManager->addMessageToQueue(queueName, request.jsonMessage, response.body);
+                }
+            }
+        }
+    );
+
+    this->router->addRoute(
+        "DELETE",
+        std::regex(R"(^/queue/([^/]+)$)"),
+        [this] (const Request& request, Response & response) {
+            std::string queueName = extractQueueName(request.uri);
+            if ( queueName.empty()) {
+                response.body["error"] = "Queue name cannot be empty";
+                response.statusCode = 404;
+            }else {
+                response.statusCode = this->queueManager->deleteMessageFromQueue(queueName,request.jsonMessage, response.body);
+            }
+        }
+    );
 }
 
 void Server::setupServerSocket()
@@ -218,30 +274,39 @@ void Server::removeClient(int clientFd)
     clientLastActive.erase(clientFd);
 }
 
-void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector<ParsedMessage> &messages)
+void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector<Request> &messages)
 {
     for (const auto &msg : messages)
     {
-        JSON rtnMessage;
+        Response resp;
         try
         {
             if (!msg.isValid)
             {
-                rtnMessage["Error"] = msg.error;
+                resp.body["Error"] = msg.error;
+                resp.statusCode = 400;
             }
             else
             {
-                JSON messageContent = msg.jsonMessage;
-                rtnMessage = instance->queueManager->handleMessage(messageContent);
+                std::smatch pathMatch;
+                HTTPRoute* route = instance->router->findRoute(msg, pathMatch);
+
+                if (!route) {
+                    resp.statusCode = 400;
+                    resp.body["Error"] = "Route not found";
+                }else {
+                    JSON messageContent = msg.jsonMessage;
+                    route->handler(msg, resp);
+                }
             }
         }
         catch (std::runtime_error &err)
         {
             // Logger::log("Server", "Invalid Message from " + get_peer_address(clientFd) + ". What: " + err.what() + ". Received Message: " + msg.jsonMessage.dump());
-            std::string errorMessage = err.what();
-            rtnMessage["error"] = errorMessage;
+            const std::string errorMessage = err.what();
+            resp.body["error"] = errorMessage;
+            resp.statusCode = 500;
         }
-        std::string message = rtnMessage.dump();
-        clientHandler->handleSend(message);
+        clientHandler->handleSend(resp);
     }
 }

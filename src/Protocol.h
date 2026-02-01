@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "ParsedMessage.h"
+#include "Request.h"
+#include "Response.h"
 
 class Protocol
 {
@@ -12,10 +13,11 @@ protected:
     std::string prevBuffer;
 
 public:
-    virtual ~Protocol() = default;
+    virtual ~Protocol() {};
     virtual void clear() = 0;
-    virtual std::vector<ParsedMessage> parseData(const std::string &buffer) = 0;
+    virtual std::vector<Request> parseData(const std::string &buffer) = 0;
     virtual std::string prepareData(const std::string &buffer) = 0;
+    virtual std::string prepareResponse(const Response &response) = 0;
 };
 
 #endif

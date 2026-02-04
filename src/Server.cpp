@@ -58,7 +58,7 @@ void Server::setupRoutes() const {
 
     this->router->addRoute(
         "GET",
-        std::regex(R"(^/queue/([^/]+)$)"),
+        "/queue/",
         [this](const Request& request, Response & response) {
             std::string getQueueName = extractQueueName(request.uri);
             if (getQueueName.empty()) {
@@ -72,7 +72,7 @@ void Server::setupRoutes() const {
 
     this->router->addRoute(
         "POST",
-        std::regex(R"(^/queue/([^/]+)$)"),
+        "/queue/",
         [this] (const Request& request, Response & response) {
             std::string queueName = extractQueueName(request.uri);
             if  (queueName.empty()) {
@@ -90,7 +90,7 @@ void Server::setupRoutes() const {
 
     this->router->addRoute(
         "DELETE",
-        std::regex(R"(^/queue/([^/]+)$)"),
+        "/queue/",
         [this] (const Request& request, Response & response) {
             std::string queueName = extractQueueName(request.uri);
             if ( queueName.empty()) {
@@ -288,8 +288,7 @@ void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector
             }
             else
             {
-                std::smatch pathMatch;
-                HTTPRoute* route = instance->router->findRoute(msg, pathMatch);
+                HTTPRoute* route = instance->router->findRoute(msg);
 
                 if (!route) {
                     resp.statusCode = 400;

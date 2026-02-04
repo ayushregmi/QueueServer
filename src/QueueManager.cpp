@@ -196,7 +196,6 @@ int QueueManager::getMessagesFromQueue(const std::string& queueName,JSON & res) 
     }
 
     const std::string messages = q->second.getMessagesFromQueue(10);
-    Logger::log("Muji", messages);
     res["Messages"] = messages;
     return 200;
 }

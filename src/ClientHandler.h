@@ -1,10 +1,8 @@
 #ifndef CLIENTHANDLER_H
 #define CLIENTHANDLER_H
 
-#include "DelimitedProtocol.h"
 #include "Logger.h"
 #include "json.h"
-#include "JsonProtocol.h"
 #include "Request.h"
 #include "Protocol.h"
 #include "utils.h"

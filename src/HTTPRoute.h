@@ -12,7 +12,7 @@ using RouteHandler = std::function<void (const Request&, Response&)>;
 
 struct HTTPRoute {
     std::string method;
-    std::regex pattern;
+    std::string prefix;
     RouteHandler handler;
 };
 

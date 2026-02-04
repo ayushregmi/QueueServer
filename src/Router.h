@@ -8,9 +8,16 @@
 
 class Router {
     std::vector<HTTPRoute> routes;
+    inline bool starts_with(std::string_view s, std::string_view prefix) {
+        return s.size() >= prefix.size() &&
+               s.compare(0, prefix.size(), prefix) == 0;
+    }
+
 public:
-    void addRoute(const std::string&, const std::regex &,const RouteHandler&);
-    HTTPRoute *findRoute(const Request &req, std::smatch &pathMatches);
+    void addRoute(const std::string&,const std::string &,const RouteHandler&);
+    HTTPRoute *findRoute(const Request &req);
+
+
 };
 
 

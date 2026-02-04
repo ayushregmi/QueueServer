@@ -9,3 +9,5 @@ Testing
 build.ninja
 .idea
 .cmake
+*.ipynb
+*.png

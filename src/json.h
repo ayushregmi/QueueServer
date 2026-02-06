@@ -57,7 +57,6 @@ public:
     // JSON &operator=(const JSON);
     const JSON &operator[](const std::string &key) const;
 
-    JSON parse_nested_json(const std::string &key) const;
 
     std::string dump() const;
     static JSON loads(const std::string &json_str);

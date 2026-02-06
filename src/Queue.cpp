@@ -9,7 +9,7 @@ Queue::~Queue()
 {
 }
 
-bool Queue::addMessageToQueue(std::string data)
+bool Queue::addMessageToQueue(const JSON& data)
 {
     QueueMessage queueMessage;
 
@@ -17,7 +17,7 @@ bool Queue::addMessageToQueue(std::string data)
     auto now = std::chrono::system_clock::now();
 
     queueMessage.receivedDate = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    queueMessage.content = data;
+    queueMessage.content = JSON::loads(data);
     queueMessage.messageId = messageId;
     this->messagesMap[messageId] = queueMessage;
 
@@ -26,7 +26,7 @@ bool Queue::addMessageToQueue(std::string data)
     return true;
 }
 
-const std::string Queue::getMessagesFromQueue(size_t numberOfMessages)
+const JSON Queue::getMessagesFromQueue(size_t numberOfMessages)
 {
     JSON jsonMessage(std::vector<JSON>{});
 
@@ -45,7 +45,7 @@ const std::string Queue::getMessagesFromQueue(size_t numberOfMessages)
 
         jsonMessage.as_array().push_back(msg);
     }
-    return jsonMessage.dump();
+    return jsonMessage;
 }
 
 bool Queue::deleteMessageFromQueue(const std::string &messageId)

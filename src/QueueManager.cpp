@@ -195,7 +195,7 @@ int QueueManager::getMessagesFromQueue(const std::string& queueName,JSON & res) 
         return 400;
     }
 
-    const std::string messages = q->second.getMessagesFromQueue(10);
+    const JSON messages = q->second.getMessagesFromQueue(10);
     res["Messages"] = messages;
     return 200;
 }
@@ -215,7 +215,7 @@ int QueueManager::addMessageToQueue(const std::string& queueName,const JSON & re
         return 400;
     }
 
-    std::string data = req["data"];
+    JSON data = req["data"];
 
     q->second.addMessageToQueue(data);
 

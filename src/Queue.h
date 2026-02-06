@@ -28,8 +28,8 @@ public:
     Queue() {};
     ~Queue();
 
-    bool addMessageToQueue(std::string);
-    const std::string getMessagesFromQueue(size_t);
+    bool addMessageToQueue(const JSON&);
+    const JSON getMessagesFromQueue(size_t);
     bool deleteMessageFromQueue(const std::string &);
 };
 

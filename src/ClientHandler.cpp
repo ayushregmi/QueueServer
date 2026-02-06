@@ -105,7 +105,7 @@ void ClientHandler::handleSend(const Response &resp) const {
     }
 }
 
-void ClientHandler::sendTimeoutMessage()
+void ClientHandler::sendTimeoutMessage() const
 {
     Response resp;
     resp.statusCode = 504;

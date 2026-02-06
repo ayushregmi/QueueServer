@@ -284,14 +284,14 @@ void Server::handleClientMessage(ClientHandler *clientHandler, const std::vector
             if (!msg.isValid)
             {
                 resp.body["Error"] = msg.error;
-                resp.statusCode = 400;
+                resp.statusCode = msg.errorCode == 0? 400: msg.errorCode;;
             }
             else
             {
                 HTTPRoute* route = instance->router->findRoute(msg);
 
                 if (!route) {
-                    resp.statusCode = 400;
+                    resp.statusCode = 404;
                     resp.body["Error"] = "Route not found";
                 }else {
                     JSON messageContent = msg.jsonMessage;

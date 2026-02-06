@@ -13,10 +13,8 @@ protected:
     std::string prevBuffer;
 
 public:
-    virtual ~Protocol() {};
-    virtual void clear() = 0;
+    virtual ~Protocol() = default;
     virtual std::vector<Request> parseData(const std::string &buffer) = 0;
-    virtual std::string prepareData(const std::string &buffer) = 0;
     virtual std::string prepareResponse(const Response &response) = 0;
 };
 

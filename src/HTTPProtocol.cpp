@@ -55,18 +55,24 @@ std::vector<Request> HTTPProtocol::parseData(const std::string &buffer)
         prevBuffer.erase(0, totalSize);
 
 
-        if (!body.empty()) {
-            try {
-                request.jsonMessage = JSON::loads(body);
-                request.isValid = true;
-            }catch (std::exception &e) {
+        if (contentLength > 0 && request.getHeader("content-type") != "application/json") {
+                request.errorCode = 415;
+                request.error = "Only application/json type allowed in body";
                 request.isValid = false;
-                request.error = e.what();
-                continue;
-            }
         }
         else {
-            request.isValid = true;
+            if (!body.empty()) {
+                try {
+                    request.jsonMessage = JSON::loads(body);
+                    request.isValid = true;
+                }catch (std::exception &e) {
+                    request.isValid = false;
+                    request.error = e.what();
+                }
+            }
+            else {
+                request.isValid = true;
+            }
         }
         requests.push_back(request);
     }
@@ -96,6 +102,7 @@ std::string HTTPProtocol::getStatusMessage(const unsigned int code) {
         case 201: return "Created";
         case 400: return "Bad Request";
         case 404: return "Not Found";
+        case 415: return "Unsupported Content Type";
         case 500: return "Internal Server Error";
         default: return "UNKNOWN";
     };

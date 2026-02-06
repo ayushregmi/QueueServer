@@ -11,11 +11,6 @@ public:
     std::vector<Request>parseData(const std::string &buffer) override;
     std::string prepareResponse(const Response &response) override;
     static std::string getStatusMessage(unsigned int code);
-
-    std::string prepareData(const std::string &buffer) override{
-        return buffer;
-    };
-    void clear() override{};
 };
 
 #endif

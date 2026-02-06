@@ -132,7 +132,7 @@ std::string JSON::dump() const
         return r + ']';
     case Type::Object:
         r = "{";
-        for (auto i = object_value.begin(); i != object_value.end(); i++)
+        for (auto i = object_value.begin(); i != object_value.end(); ++i)
         {
             r += "\"" + i->first + "\" : " + i->second.dump();
             if (std::next(i) != object_value.end())

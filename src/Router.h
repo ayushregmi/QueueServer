@@ -8,7 +8,7 @@
 
 class Router {
     std::vector<HTTPRoute> routes;
-    inline bool starts_with(std::string_view s, std::string_view prefix) {
+    static bool starts_with(const std::string_view s, const std::string_view prefix) {
         return s.size() >= prefix.size() &&
                s.compare(0, prefix.size(), prefix) == 0;
     }

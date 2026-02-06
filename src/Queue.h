@@ -1,6 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -24,12 +25,12 @@ private:
     std::string queueName;
 
 public:
-    Queue(std::string queueName);
-    Queue() {};
-    ~Queue();
+    explicit Queue(std::string  queueName): queueName(std::move(queueName)){};
+    Queue() = default;
+    ~Queue() = default;
 
     bool addMessageToQueue(const JSON&);
-    const JSON getMessagesFromQueue(size_t);
+    JSON getMessagesFromQueue(size_t);
     bool deleteMessageFromQueue(const std::string &);
 };
 

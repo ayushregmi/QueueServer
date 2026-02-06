@@ -1,13 +1,5 @@
 #include "Queue.h"
 
-Queue::Queue(std::string queueName)
-{
-    this->queueName = queueName;
-}
-
-Queue::~Queue()
-{
-}
 
 bool Queue::addMessageToQueue(const JSON& data)
 {
@@ -26,7 +18,7 @@ bool Queue::addMessageToQueue(const JSON& data)
     return true;
 }
 
-const JSON Queue::getMessagesFromQueue(size_t numberOfMessages)
+JSON Queue::getMessagesFromQueue(size_t numberOfMessages)
 {
     JSON jsonMessage(std::vector<JSON>{});
 

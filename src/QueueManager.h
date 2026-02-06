@@ -20,16 +20,11 @@ private:
     const size_t maxNumberOfQueues = 5;
     size_t numOfQueues = 0;
 
-    int createNewQueue(const JSON &, JSON &);
-    int getMessagesFromQueue(const JSON &, JSON &);
-    int addMessageToQueue(const JSON &, JSON &);
-    int deleteMessageFromQueue(const JSON &, JSON &);
-
     static std::string getQueueName(const JSON &message);
 
 public:
-    QueueManager();
-    ~QueueManager() {};
+    QueueManager() = default;
+    ~QueueManager() = default;
 
 
     int createNewQueue(const std::string &, JSON &);
@@ -37,7 +32,6 @@ public:
     int addMessageToQueue(const std::string&,const JSON &, JSON &);
     int deleteMessageFromQueue(const std::string&, const JSON &, JSON &);
 
-    int handleRequest(const JSON &, JSON &);
 };
 
 #endif

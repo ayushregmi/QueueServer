@@ -31,7 +31,7 @@ public:
     int getFd() const;
     bool handleRead();
     void handleSend(const Response &message) const;
-    void sendTimeoutMessage();
+    void sendTimeoutMessage() const;
 
 private:
     std::shared_ptr<Protocol> protocolHandler;
